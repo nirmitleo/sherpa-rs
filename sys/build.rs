@@ -73,6 +73,20 @@ fn main() {
         .define("BUILD_SHARED_LIBS", "OFF")
         .define("SHERPA_ONNX_ENABLE_WEBSOCKET", "OFF");
 
+    if cfg!(target_os = "macos") {
+        env::set_var("MACOSX_DEPLOYMENT_TARGET", "11.0");
+        config.define("CMAKE_OSX_DEPLOYMENT_TARGET", "11.0");
+
+        // Set C and C++ compilers explicitly
+        config.define("CMAKE_C_COMPILER", "clang");
+        config.define("CMAKE_CXX_COMPILER", "clang++");
+
+        // Set C and C++ flags
+        config.define("CMAKE_C_FLAGS", "-mmacosx-version-min=11.0");
+        config.define("CMAKE_CXX_FLAGS", "-mmacosx-version-min=11.0");
+        println!("cargo:rustc-link-arg=-Wl,-platform_version,macos,11.0,11.0");
+    }
+
     // TTS
     config.define(
         "SHERPA_ONNX_ENABLE_TTS",
@@ -138,7 +152,6 @@ fn main() {
     println!("cargo:rustc-link-lib=static=sherpa-onnx-fstfar");
     println!("cargo:rustc-link-lib=static=ssentencepiece_core");
     println!("cargo:rustc-link-lib=static=sherpa-onnx-fst");
-    
 
     // Cuda
     if cfg!(feature = "cuda") && cfg!(windows) {
